@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azar Cafetero - Real-Time Gaming Platform</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 36px;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 16px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #555;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 13px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-size: 13px;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-weight: 500;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .tables-list, .floor-tables, .messages {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            border: 1px solid #e0e0e0;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+
+        .table-item, .message-item, .event-item {
+            padding: 10px;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            border-left: 3px solid #667eea;
+        }
+
+        .table-item.closed {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+
+        .table-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .table-info {
+            color: #666;
+            font-size: 11px;
+        }
+
+        .message-item {
+            border-left-color: #28a745;
+        }
+
+        .event-item {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .event-item.created {
+            border-left-color: #ffc107;
+        }
+
+        .event-item.joined {
+            border-left-color: #17a2b8;
+        }
+
+        .event-item.closed {
+            border-left-color: #dc3545;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 15px;
+            font-size: 12px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .button-group button {
+            flex: 1;
+            padding: 8px;
+        }
+
+        textarea {
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        @media (max-width: 1200px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <h1>🎮 Azar Cafetero - Real-Time Gaming Platform</h1>
+
+        <div class="layout">
+            <!-- Left Panel: Connection & Floor -->
+            <div class="card">
+                <h2>Connection & Floor</h2>
+                <div class="status disconnected" id="status">Disconnected</div>
+
+                <div class="form-group">
+                    <label for="serverUrl">Server URL</label>
+                    <input type="text" id="serverUrl" value="http://localhost:8080/ws">
+                </div>
+
+                <div class="form-group">
+                    <label for="playerId">Player ID</label>
+                    <input type="text" id="playerId" placeholder="e.g., player-1">
+                </div>
+
+                <div class="form-group">
+                    <label for="playerName">Player Name</label>
+                    <input type="text" id="playerName" placeholder="e.g., Alice">
+                </div>
+
+                <div class="button-group">
+                    <button id="connectBtn" onclick="connect()">Connect</button>
+                    <button id="disconnectBtn" onclick="disconnect()" disabled>Disconnect</button>
+                </div>
+
+                <h2 style="margin-top: 20px;">Floor Selection</h2>
+
+                <div class="form-group">
+                    <label for="floorId">Floor ID</label>
+                    <input type="text" id="floorId" placeholder="e.g., 550e8400-e29b-41d4-a716-446655440000">
+                </div>
+
+                <div class="button-group">
+                    <button id="subscribeFloorBtn" onclick="subscribeToFloor()" disabled>Subscribe Floor</button>
+                    <button id="unsubscribeFloorBtn" onclick="unsubscribeFromFloor()" disabled>Unsubscribe</button>
+                </div>
+
+                <h2 style="margin-top: 20px;">Floor Tables</h2>
+                <div class="floor-tables" id="floorTables">
+                    <div class="empty-state">No floor selected</div>
+                </div>
+            </div>
+
+            <!-- Center Panel: Table Management & Messages -->
+            <div class="card">
+                <h2>Table Management</h2>
+
+                <div class="form-group">
+                    <label for="tableId">Table ID</label>
+                    <input type="text" id="tableId" placeholder="e.g., table-1">
+                </div>
+
+                <div class="button-group">
+                    <button id="joinBtn" onclick="joinTable()" disabled>Join Table</button>
+                    <button id="leaveBtn" onclick="leaveTable()" disabled>Leave Table</button>
+                </div>
+
+                <h2 style="margin-top: 20px;">Send Message</h2>
+
+                <div class="form-group">
+                    <label for="messageContent">Message</label>
+                    <textarea id="messageContent" placeholder="Enter your message..." rows="3" disabled></textarea>
+                </div>
+
+                <button id="sendBtn" onclick="sendMessage()" disabled style="margin-bottom: 20px;">Send</button>
+
+                <h2>Table Messages</h2>
+                <div class="messages" id="messages">
+                    <div class="empty-state">No messages yet</div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Events -->
+            <div class="card">
+                <h2>Floor Events</h2>
+                <div class="messages" id="events">
+                    <div class="empty-state">Waiting for events...</div>
+                </div>
+
+                <h2 style="margin-top: 20px;">Connected Players</h2>
+                <div class="tables-list" id="playersList">
+                    <div class="empty-state">No players</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let stompClient = null;
+        let connected = false;
+        let currentTableId = null;
+        let currentFloorId = null;
+        let players = new Set();
+        let floorTables = new Map();
+
+        function connect() {
+            const serverUrl = document.getElementById('serverUrl').value;
+            const socket = new SockJS(serverUrl);
+            stompClient = Stomp.over(socket);
+
+            stompClient.connect({}, function(frame) {
+                connected = true;
+                updateStatus(true);
+                updateButtons();
+                addEvent('Connected to server', 'connection');
+            }, function(error) {
+                connected = false;
+                updateStatus(false);
+                updateButtons();
+                addEvent('Connection failed: ' + error, 'error');
+            });
+        }
+
+        function disconnect() {
+            if (stompClient != null) {
+                if (currentFloorId) {
+                    unsubscribeFromFloor();
+                }
+                stompClient.disconnect(function() {
+                    connected = false;
+                    currentTableId = null;
+                    currentFloorId = null;
+                    players.clear();
+                    floorTables.clear();
+                    updateStatus(false);
+                    updateButtons();
+                    addEvent('Disconnected', 'connection');
+                });
+            }
+        }
+
+        function subscribeToFloor() {
+            const floorId = document.getElementById('floorId').value;
+            const playerId = document.getElementById('playerId').value;
+
+            if (!floorId || !playerId) {
+                alert('Please fill in Floor ID and Player ID');
+                return;
+            }
+
+            if (!stompClient || !connected) {
+                alert('Not connected');
+                return;
+            }
+
+            currentFloorId = floorId;
+            floorTables.clear();
+
+            // Subscribe to floor events
+            stompClient.subscribe('/topic/floor/' + floorId, function(message) {
+                const event = JSON.parse(message.body);
+                handleFloorEvent(event);
+            });
+
+            // Send subscription message
+            stompClient.send('/app/floor/' + floorId + '/subscribe', {}, JSON.stringify({
+                floorId: floorId,
+                playerId: playerId
+            }));
+
+            updateButtons();
+            addEvent('Subscribed to floor: ' + floorId, 'subscription');
+        }
+
+        function unsubscribeFromFloor() {
+            if (!currentFloorId || !stompClient) return;
+
+            const playerId = document.getElementById('playerId').value;
+
+            stompClient.send('/app/floor/' + currentFloorId + '/unsubscribe', {}, JSON.stringify({
+                floorId: currentFloorId,
+                playerId: playerId
+            }));
+
+            currentFloorId = null;
+            floorTables.clear();
+            updateFloorTables();
+            updateButtons();
+            addEvent('Unsubscribed from floor', 'subscription');
+        }
+
+        function joinTable() {
+            const tableId = document.getElementById('tableId').value;
+            const playerId = document.getElementById('playerId').value;
+            const playerName = document.getElementById('playerName').value;
+
+            if (!tableId || !playerId || !playerName) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            if (!stompClient || !connected) {
+                alert('Not connected');
+                return;
+            }
+
+            currentTableId = tableId;
+            players.add(playerName);
+
+            // Subscribe to table topic
+            stompClient.subscribe('/topic/table/' + tableId, function(message) {
+                const body = JSON.parse(message.body);
+                displayMessage(body);
+            });
+
+            // Send join message
+            stompClient.send('/app/table/' + tableId + '/join', {}, JSON.stringify({
+                playerId: playerId,
+                playerName: playerName,
+                tableId: tableId
+            }));
+
+            updateButtons();
+            addEvent('Joined table: ' + tableId, 'table');
+        }
+
+        function leaveTable() {
+            if (!currentTableId || !stompClient) return;
+
+            const playerId = document.getElementById('playerId').value;
+            const playerName = document.getElementById('playerName').value;
+
+            stompClient.send('/app/table/' + currentTableId + '/leave', {}, JSON.stringify({
+                playerId: playerId,
+                playerName: playerName,
+                tableId: currentTableId
+            }));
+
+            currentTableId = null;
+            players.clear();
+            updateButtons();
+            addEvent('Left table', 'table');
+        }
+
+        function sendMessage() {
+            const content = document.getElementById('messageContent').value;
+            const playerId = document.getElementById('playerId').value;
+
+            if (!content.trim()) {
+                alert('Message cannot be empty');
+                return;
+            }
+
+            if (!currentTableId || !stompClient) {
+                alert('Not connected to a table');
+                return;
+            }
+
+            stompClient.send('/app/table/' + currentTableId + '/message', {}, JSON.stringify({
+                playerId: playerId,
+                tableId: currentTableId,
+                content: content,
+                timestamp: new Date().toISOString()
+            }));
+
+            document.getElementById('messageContent').value = '';
+        }
+
+        function displayMessage(message) {
+            const isSystem = message.playerId === 'SYSTEM';
+            const messagesDiv = document.getElementById('messages');
+
+            if (messagesDiv.innerHTML === '<div class="empty-state">No messages yet</div>') {
+                messagesDiv.innerHTML = '';
+            }
+
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message-item';
+
+            const text = isSystem ? 
+                `[SYSTEM] ${message.content}` : 
+                `${message.playerId}: ${message.content}`;
+
+            messageElement.textContent = text;
+            messagesDiv.appendChild(messageElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            // Update players list for system messages
+            if (isSystem && message.content.includes('joined')) {
+                const playerName = message.content.split(' ')[0];
+                players.add(playerName);
+                updatePlayersList();
+            } else if (isSystem && message.content.includes('left')) {
+                const playerName = message.content.split(' ')[0];
+                players.delete(playerName);
+                updatePlayersList();
+            }
+        }
+
+        function handleFloorEvent(event) {
+            const type = event.eventType;
+
+            if (type === 'TABLE_CREATED') {
+                floorTables.set(event.tableId, {
+                    name: event.tableName,
+                    maxPlayers: event.maxPlayers,
+                    currentPlayers: 0,
+                    closed: false
+                });
+                addEvent(`📋 Table created: ${event.tableName} (${event.maxPlayers} seats)`, 'created');
+            } else if (type === 'PLAYER_JOINED') {
+                const table = floorTables.get(event.tableId);
+                if (table) {
+                    table.currentPlayers = event.currentPlayers;
+                    addEvent(`👤 ${event.playerName} joined ${event.tableId} (${event.currentPlayers}/${event.currentPlayers + event.availableSeats})`, 'joined');
+                }
+            } else if (type === 'TABLE_CLOSED') {
+                const table = floorTables.get(event.tableId);
+                if (table) {
+                    table.closed = true;
+                    addEvent(`❌ Table closed: ${event.tableId}`, 'closed');
+                }
+            }
+
+            updateFloorTables();
+        }
+
+        function addEvent(text, type = 'event') {
+            const eventsDiv = document.getElementById('events');
+
+            if (eventsDiv.innerHTML === '<div class="empty-state">Waiting for events...</div>') {
+                eventsDiv.innerHTML = '';
+            }
+
+            const eventElement = document.createElement('div');
+            eventElement.className = `event-item ${type}`;
+            eventElement.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+
+            eventsDiv.appendChild(eventElement);
+            eventsDiv.scrollTop = eventsDiv.scrollHeight;
+        }
+
+        function updateFloorTables() {
+            const tablesDiv = document.getElementById('floorTables');
+            
+            if (floorTables.size === 0) {
+                tablesDiv.innerHTML = '<div class="empty-state">No tables in floor</div>';
+                return;
+            }
+
+            tablesDiv.innerHTML = '';
+            floorTables.forEach((table, tableId) => {
+                const tableElement = document.createElement('div');
+                tableElement.className = `table-item ${table.closed ? 'closed' : ''}`;
+                
+                const occupied = table.currentPlayers;
+                const available = table.maxPlayers - occupied;
+                
+                tableElement.innerHTML = `
+                    <div class="table-name">${table.name}</div>
+                    <div class="table-info">
+                        👥 ${occupied}/${table.maxPlayers} | 💺 ${available} available
+                    </div>
+                `;
+                
+                tablesDiv.appendChild(tableElement);
+            });
+        }
+
+        function updatePlayersList() {
+            const playersList = document.getElementById('playersList');
+            if (players.size === 0) {
+                playersList.innerHTML = '<div class="empty-state">No players</div>';
+            } else {
+                playersList.innerHTML = Array.from(players)
+                    .map(player => `<div class="table-item">👤 ${player}</div>`)
+                    .join('');
+            }
+        }
+
+        function updateStatus(isConnected) {
+            const statusDiv = document.getElementById('status');
+            if (isConnected) {
+                statusDiv.textContent = '✅ Connected';
+                statusDiv.className = 'status connected';
+            } else {
+                statusDiv.textContent = '❌ Disconnected';
+                statusDiv.className = 'status disconnected';
+            }
+        }
+
+        function updateButtons() {
+            const connectBtn = document.getElementById('connectBtn');
+            const disconnectBtn = document.getElementById('disconnectBtn');
+            const subscribeFloorBtn = document.getElementById('subscribeFloorBtn');
+            const unsubscribeFloorBtn = document.getElementById('unsubscribeFloorBtn');
+            const joinBtn = document.getElementById('joinBtn');
+            const leaveBtn = document.getElementById('leaveBtn');
+            const messageContent = document.getElementById('messageContent');
+            const sendBtn = document.getElementById('sendBtn');
+
+            connectBtn.disabled = connected;
+            disconnectBtn.disabled = !connected;
+            subscribeFloorBtn.disabled = !connected || !!currentFloorId;
+            unsubscribeFloorBtn.disabled = !currentFloorId;
+            joinBtn.disabled = !connected || !!currentTableId;
+            leaveBtn.disabled = !currentTableId;
+            messageContent.disabled = !currentTableId;
+            sendBtn.disabled = !currentTableId;
+        }
+
+        // Initialize
+        updateStatus(false);
+        updateButtons();
+    </script>
+</body>
+</html>
