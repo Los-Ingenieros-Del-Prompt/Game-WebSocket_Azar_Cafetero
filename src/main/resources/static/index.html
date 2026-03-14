@@ -15,9 +15,10 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             min-height: 100vh;
             padding: 20px;
+            color: #333;
         }
 
         .main-container {
@@ -27,10 +28,12 @@
 
         h1 {
             text-align: center;
-            color: white;
-            font-size: 36px;
+            color: #fff;
+            font-size: 38px;
             margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            font-weight: 700;
+            letter-spacing: 1px;
         }
 
         .layout {
@@ -40,20 +43,23 @@
         }
 
         .card {
-            background: white;
-            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
             padding: 24px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2);
             max-height: 90vh;
             overflow-y: auto;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         h2 {
-            color: #333;
+            color: #1e3c72;
             margin-bottom: 16px;
             font-size: 18px;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 3px solid #2a5298;
             padding-bottom: 10px;
+            font-weight: 600;
         }
 
         .form-group {
@@ -63,66 +69,75 @@
         label {
             display: block;
             margin-bottom: 6px;
-            color: #555;
-            font-weight: 500;
+            color: #1e3c72;
+            font-weight: 600;
             font-size: 13px;
         }
 
         input, select {
             width: 100%;
             padding: 10px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
+            border: 2px solid #e8eef7;
+            border-radius: 8px;
             font-family: inherit;
             font-size: 13px;
-            transition: border-color 0.3s;
+            transition: all 0.3s ease;
+            background: #fafbfc;
         }
 
         input:focus, select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #2a5298;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
         }
 
         button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
             color: white;
-            padding: 10px 16px;
+            padding: 11px 18px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s ease;
             font-size: 13px;
             width: 100%;
+            box-shadow: 0 4px 12px rgba(42, 82, 152, 0.3);
         }
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 24px rgba(42, 82, 152, 0.5);
         }
 
         button:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         .status {
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 16px;
-            font-weight: 500;
-            font-size: 12px;
+            padding: 12px;
+            border-radius: 12px;
             text-align: center;
+            margin-bottom: 16px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .status.connected {
-            background: #d4edda;
-            color: #155724;
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            color: #065f46;
+            border: 1px solid #6ee7b7;
         }
 
         .status.disconnected {
-            background: #f8d7da;
-            color: #721c24;
+            background: linear-gradient(135deg, #fa8072 0%, #ff6b6b 100%);
+            color: #fff;
+            border: 1px solid #ff5252;
         }
 
         .tables-list, .floor-tables, .messages {
@@ -137,21 +152,28 @@
         }
 
         .table-item, .message-item, .event-item {
-            padding: 10px;
-            background: white;
-            margin-bottom: 8px;
-            border-radius: 4px;
-            border-left: 3px solid #667eea;
+            padding: 12px;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e8eef7 100%);
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #2a5298;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        .table-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateX(2px);
         }
 
         .table-item.closed {
-            opacity: 0.5;
+            opacity: 0.6;
             text-decoration: line-through;
         }
 
         .table-name {
             font-weight: 600;
-            color: #333;
+            color: #1e3c72;
             margin-bottom: 4px;
         }
 
@@ -161,24 +183,49 @@
         }
 
         .message-item {
-            border-left-color: #28a745;
+            border-left-color: #2a5298;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            font-family: 'Courier New', monospace;
         }
 
         .event-item {
-            font-size: 11px;
-            color: #666;
+            font-size: 12px;
+            color: #333;
+        }
+
+        .event-item.connection {
+            border-left-color: #2a5298;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        }
+
+        .event-item.subscription {
+            border-left-color: #7b1fa2;
+            background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+        }
+
+        .event-item.table {
+            border-left-color: #388e3c;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        }
+
+        .event-item.error {
+            border-left-color: #d32f2f;
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
         }
 
         .event-item.created {
-            border-left-color: #ffc107;
+            border-left-color: #0097a7;
+            background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
         }
 
         .event-item.joined {
-            border-left-color: #17a2b8;
+            border-left-color: #f57c00;
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
         }
 
         .event-item.closed {
-            border-left-color: #dc3545;
+            border-left-color: #d32f2f;
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
         }
 
         .empty-state {
@@ -186,6 +233,7 @@
             color: #999;
             padding: 15px;
             font-size: 12px;
+            font-style: italic;
         }
 
         .button-group {
@@ -223,7 +271,7 @@
 
                 <div class="form-group">
                     <label for="serverUrl">Server URL</label>
-                    <input type="text" id="serverUrl" value="http://localhost:8080/ws">
+                    <input type="text" id="serverUrl" value="/ws">
                 </div>
 
                 <div class="form-group">
@@ -313,20 +361,88 @@
 
         function connect() {
             const serverUrl = document.getElementById('serverUrl').value;
-            const socket = new SockJS(serverUrl);
-            stompClient = Stomp.over(socket);
+            
+            // Normalize the URL to an absolute HTTP/HTTPS URL for SockJS
+            let fullUrl = serverUrl;
+            if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) {
+                // Relative path - prepend current origin
+                fullUrl = window.location.origin + fullUrl;
+            }
+            
+            console.log('🔌 Connecting to:', fullUrl);
+            console.log('Current location:', window.location.href);
+            console.log('Current origin:', window.location.origin);
+            addEvent('🔌 Connecting to: ' + fullUrl, 'connection');
+            
+            // First test if the endpoint is reachable
+            fetch(fullUrl)
+                .then(r => console.log('Endpoint reachable, status:', r.status))
+                .catch(e => console.warn('Endpoint check failed (expected for WebSocket):', e.message));
+            
+            try {
+                const socket = new SockJS(fullUrl, null, {
+                    transports: ['websocket', 'xhr-streaming', 'xhr-polling']
+                });
+                
+                socket.onopen = function() {
+                    console.log('✅ SockJS connection established');
+                    addEvent('✅ SockJS transport established', 'connection');
+                };
+                
+                socket.onclose = function(event) {
+                    console.log('❌ SockJS connection closed', event);
+                    if (!connected) {
+                        addEvent('❌ SockJS connection closed without STOMP connection', 'error');
+                    }
+                };
+                
+                socket.onerror = function(error) {
+                    console.error('❌ SockJS error:', error);
+                    addEvent('❌ SockJS error', 'error');
+                };
+                
+                stompClient = Stomp.over(socket);
+                stompClient.debug = function(str) {
+                    if (str.includes('CONNECTED') || str.includes('ERROR')) {
+                        console.log('[STOMP]', str);
+                    }
+                };
 
-            stompClient.connect({}, function(frame) {
-                connected = true;
-                updateStatus(true);
-                updateButtons();
-                addEvent('Connected to server', 'connection');
-            }, function(error) {
+                stompClient.connect({}, function(frame) {
+                    connected = true;
+                    updateStatus(true);
+                    updateButtons();
+                    addEvent('✅ Connected to STOMP broker', 'connection');
+                    console.log('✅ STOMP Connected:', frame);
+                }, function(error) {
+                    connected = false;
+                    updateStatus(false);
+                    updateButtons();
+                    console.error('STOMP connection error:', error);
+                    
+                    let errorMsg = 'STOMP Connection failed';
+                    if (error && error.body) {
+                        try {
+                            const body = JSON.parse(error.body);
+                            errorMsg += ': ' + JSON.stringify(body);
+                        } catch (e) {
+                            errorMsg += ': ' + error.body;
+                        }
+                    } else if (error && error.message) {
+                        errorMsg += ': ' + error.message;
+                    } else if (typeof error === 'string') {
+                        errorMsg += ': ' + error;
+                    }
+                    
+                    addEvent('❌ ' + errorMsg, 'error');
+                });
+            } catch (e) {
+                console.error('❌ Connection initialization error:', e);
+                addEvent('❌ Error: ' + e.message, 'error');
                 connected = false;
                 updateStatus(false);
                 updateButtons();
-                addEvent('Connection failed: ' + error, 'error');
-            });
+            }
         }
 
         function disconnect() {
