@@ -15,6 +15,9 @@ public class TableDTO {
     @JsonProperty("createdAt")
     private Long createdAt;
 
+    @JsonProperty("requiredBet")
+    private Double requiredBet;
+
     public TableDTO() {
     }
 
@@ -23,6 +26,14 @@ public class TableDTO {
         this.tableName = tableName;
         this.playerCount = playerCount;
         this.createdAt = createdAt;
+    }
+
+    public TableDTO(String tableId, String tableName, Integer playerCount, Long createdAt, Double requiredBet) {
+        this.tableId = tableId;
+        this.tableName = tableName;
+        this.playerCount = playerCount;
+        this.createdAt = createdAt;
+        this.requiredBet = requiredBet;
     }
 
     public String getTableId() {
@@ -57,6 +68,14 @@ public class TableDTO {
         this.createdAt = createdAt;
     }
 
+    public Double getRequiredBet() {
+        return requiredBet;
+    }
+
+    public void setRequiredBet(Double requiredBet) {
+        this.requiredBet = requiredBet;
+    }
+
     @Override
     public String toString() {
         return "TableDTO{" +
@@ -64,6 +83,7 @@ public class TableDTO {
                 ", tableName='" + tableName + '\'' +
                 ", playerCount=" + playerCount +
                 ", createdAt=" + createdAt +
+                ", requiredBet=" + requiredBet +
                 '}';
     }
 }
