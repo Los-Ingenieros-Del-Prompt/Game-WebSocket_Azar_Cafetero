@@ -30,6 +30,18 @@ public class JoinTableService implements JoinTableUseCase {
                     return newSession;
                 });
 
+        if (session.isFull()) {
+            throw new IllegalStateException("Table is full");
+        }
+
+        double requiredBet = session.getTable().getRequiredBet();
+        if (player.getBalance() < requiredBet) {
+            throw new IllegalStateException(
+                String.format("Insufficient balance. Required: %.2f, Available: %.2f", 
+                    requiredBet, player.getBalance())
+            );
+        }
+
         session.addPlayer(player);
     }
 }

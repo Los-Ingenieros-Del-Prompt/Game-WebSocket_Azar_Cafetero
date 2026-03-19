@@ -30,13 +30,16 @@ public class TableController {
         if (request.getTableName() == null || request.getTableName().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Table name cannot be blank");
         }
-        if (request.getRequiredBet() == null || request.getRequiredBet() < 0) {
+        if (request.getRequiredBet() == null || request.getRequiredBet() <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Required bet must be positive");
         }
+        
+        int maxPlayers = request.getMaxPlayers() != null ? request.getMaxPlayers() : 6;
+        if (maxPlayers <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Max players must be positive");
+        }
 
-        Table table = createTableUseCase.createTable(request.getTableName(), request.getRequiredBet());
-        sessionManager.findById(table.getId())
-                .ifPresent(session -> {});
+        Table table = createTableUseCase.createTable(request.getTableName(), request.getRequiredBet(), maxPlayers);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new TableDTO(table.getId(), table.getName(), 0, System.currentTimeMillis(), table.getRequiredBet()));

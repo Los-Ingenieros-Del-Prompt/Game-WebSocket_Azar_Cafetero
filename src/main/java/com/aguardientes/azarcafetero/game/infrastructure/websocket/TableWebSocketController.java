@@ -9,8 +9,10 @@ import com.aguardientes.azarcafetero.game.application.port.in.NotifyPlayerJoined
 import com.aguardientes.azarcafetero.game.application.port.in.NotifyTableClosedUseCase;
 import com.aguardientes.azarcafetero.game.application.port.in.SubscribeToFloorUseCase;
 import com.aguardientes.azarcafetero.game.application.port.in.UnsubscribeFromFloorUseCase;
+import com.aguardientes.azarcafetero.game.application.port.out.LobbyPlayerClient;
 import com.aguardientes.azarcafetero.game.domain.Player;
 import com.aguardientes.azarcafetero.game.domain.TableMessage;
+import com.aguardientes.azarcafetero.game.infrastructure.client.dto.LobbyPlayerDTO;
 import com.aguardientes.azarcafetero.game.infrastructure.websocket.dto.JoinTableDTO;
 import com.aguardientes.azarcafetero.game.infrastructure.websocket.dto.TableMessageDTO;
 import com.aguardientes.azarcafetero.game.infrastructure.websocket.dto.SubscribeToFloorDTO;
@@ -37,6 +39,7 @@ public class TableWebSocketController {
     private final NotifyTableClosedUseCase notifyTableClosedUseCase;
     private final SubscribeToFloorUseCase subscribeToFloorUseCase;
     private final UnsubscribeFromFloorUseCase unsubscribeFromFloorUseCase;
+    private final LobbyPlayerClient lobbyPlayerClient;
 
     public TableWebSocketController(
             JoinTableUseCase joinTableUseCase,
@@ -47,7 +50,8 @@ public class TableWebSocketController {
             NotifyPlayerJoinedUseCase notifyPlayerJoinedUseCase,
             NotifyTableClosedUseCase notifyTableClosedUseCase,
             SubscribeToFloorUseCase subscribeToFloorUseCase,
-            UnsubscribeFromFloorUseCase unsubscribeFromFloorUseCase) {
+            UnsubscribeFromFloorUseCase unsubscribeFromFloorUseCase,
+            LobbyPlayerClient lobbyPlayerClient) {
         this.joinTableUseCase = Objects.requireNonNull(joinTableUseCase, "JoinTableUseCase cannot be null");
         this.leaveTableUseCase = Objects.requireNonNull(leaveTableUseCase, "LeaveTableUseCase cannot be null");
         this.sendMessageUseCase = Objects.requireNonNull(sendMessageUseCase, "SendMessageUseCase cannot be null");
@@ -57,6 +61,7 @@ public class TableWebSocketController {
         this.notifyTableClosedUseCase = Objects.requireNonNull(notifyTableClosedUseCase, "NotifyTableClosedUseCase cannot be null");
         this.subscribeToFloorUseCase = Objects.requireNonNull(subscribeToFloorUseCase, "SubscribeToFloorUseCase cannot be null");
         this.unsubscribeFromFloorUseCase = Objects.requireNonNull(unsubscribeFromFloorUseCase, "UnsubscribeFromFloorUseCase cannot be null");
+        this.lobbyPlayerClient = Objects.requireNonNull(lobbyPlayerClient, "LobbyPlayerClient cannot be null");
     }
 
     @MessageMapping("/table/{tableId}/join")
@@ -65,10 +70,13 @@ public class TableWebSocketController {
             JoinTableDTO joinRequest,
             @DestinationVariable String tableId) {
         
+        LobbyPlayerDTO lobbyPlayer = lobbyPlayerClient.getPlayerById(joinRequest.getPlayerId());
+        
         Player player = new Player(
                 joinRequest.getPlayerId(),
-                joinRequest.getPlayerName(),
-                joinRequest.getPlayerId()
+                lobbyPlayer.getDisplayName(),
+                joinRequest.getPlayerId(),
+                lobbyPlayer.getBalance().doubleValue()
         );
         
         joinTableUseCase.joinTable(tableId, player);
@@ -76,7 +84,7 @@ public class TableWebSocketController {
         return new TableMessageDTO(
                 "SYSTEM",
                 tableId,
-                joinRequest.getPlayerName() + " joined the table",
+                lobbyPlayer.getDisplayName() + " joined the table",
                 Instant.now()
         );
     }

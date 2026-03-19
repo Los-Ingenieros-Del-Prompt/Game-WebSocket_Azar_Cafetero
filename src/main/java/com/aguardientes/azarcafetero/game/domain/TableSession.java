@@ -55,6 +55,14 @@ public class TableSession {
         return players.isEmpty();
     }
 
+    public boolean isFull() {
+        return players.size() >= table.getMaxPlayers();
+    }
+
+    public int getAvailableSeats() {
+        return Math.max(0, table.getMaxPlayers() - players.size());
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
