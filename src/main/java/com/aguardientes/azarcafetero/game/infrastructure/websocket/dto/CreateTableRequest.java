@@ -1,0 +1,60 @@
+package com.aguardientes.azarcafetero.game.infrastructure.websocket.dto;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class CreateTableRequest {
+    @JsonProperty("tableName")
+    private String tableName;
+
+    @JsonProperty("requiredBet")
+    private Double requiredBet;
+
+    @JsonProperty("maxPlayers")
+    private Integer maxPlayers;
+
+    public CreateTableRequest() {
+    }
+
+    public CreateTableRequest(String tableName, Double requiredBet) {
+        this(tableName, requiredBet, 6);
+    }
+
+    public CreateTableRequest(String tableName, Double requiredBet, Integer maxPlayers) {
+        this.tableName = tableName;
+        this.requiredBet = requiredBet;
+        this.maxPlayers = maxPlayers;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
+    public Double getRequiredBet() {
+        return requiredBet;
+    }
+
+    public void setRequiredBet(Double requiredBet) {
+        this.requiredBet = requiredBet;
+    }
+
+    public Integer getMaxPlayers() {
+        return maxPlayers;
+    }
+
+    public void setMaxPlayers(Integer maxPlayers) {
+        this.maxPlayers = maxPlayers;
+    }
+
+    @Override
+    public String toString() {
+        return "CreateTableRequest{" +
+                "tableName='" + tableName + '\'' +
+                ", requiredBet=" + requiredBet +
+                ", maxPlayers=" + maxPlayers +
+                '}';
+    }
+}
