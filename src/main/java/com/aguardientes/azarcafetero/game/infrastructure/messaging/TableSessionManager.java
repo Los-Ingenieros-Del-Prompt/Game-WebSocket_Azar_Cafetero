@@ -30,6 +30,20 @@ public class TableSessionManager implements TableSessionRepository {
         return Optional.ofNullable(sessions.get(tableId));
     }
 
+    /**
+     * Atomically get or create a session for the given table.
+     * This prevents race conditions when multiple players try to join a new table simultaneously.
+     */
+    public TableSession getOrCreate(String tableId, Table table) {
+        if (tableId == null || tableId.isBlank()) {
+            throw new IllegalArgumentException("Table id cannot be null or blank");
+        }
+        if (table == null) {
+            throw new IllegalArgumentException("Table cannot be null");
+        }
+        return sessions.computeIfAbsent(tableId, id -> new TableSession(table));
+    }
+
     @Override
     public void deleteById(String tableId) {
         if (tableId == null || tableId.isBlank()) {

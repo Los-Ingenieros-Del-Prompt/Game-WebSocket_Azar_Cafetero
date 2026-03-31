@@ -22,26 +22,25 @@ public class JoinTableService implements JoinTableUseCase {
         Objects.requireNonNull(tableId, "Table id cannot be null");
         Objects.requireNonNull(player, "Player cannot be null");
 
-        TableSession session = sessionRepository.findById(tableId)
-                .orElseGet(() -> {
-                    Table table = new Table(tableId, "Table-" + tableId);
-                    TableSession newSession = new TableSession(table);
-                    sessionRepository.save(newSession);
-                    return newSession;
-                });
+        // Atomically get or create the session to prevent race conditions
+        Table table = new Table(tableId, "Table-" + tableId);
+        TableSession session = sessionRepository.getOrCreate(tableId, table);
 
-        if (session.isFull()) {
-            throw new IllegalStateException("Table is full");
+        // Synchronize on the session to prevent concurrent modifications
+        synchronized (session) {
+            if (session.isFull()) {
+                throw new IllegalStateException("Table is full");
+            }
+
+            double requiredBet = session.getTable().getRequiredBet();
+            if (player.getBalance() < requiredBet) {
+                throw new IllegalStateException(
+                    String.format("Insufficient balance. Required: %.2f, Available: %.2f", 
+                        requiredBet, player.getBalance())
+                );
+            }
+
+            session.addPlayer(player);
         }
-
-        double requiredBet = session.getTable().getRequiredBet();
-        if (player.getBalance() < requiredBet) {
-            throw new IllegalStateException(
-                String.format("Insufficient balance. Required: %.2f, Available: %.2f", 
-                    requiredBet, player.getBalance())
-            );
-        }
-
-        session.addPlayer(player);
     }
 }
