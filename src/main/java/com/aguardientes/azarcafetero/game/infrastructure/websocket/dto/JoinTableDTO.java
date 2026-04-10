@@ -2,6 +2,8 @@ package com.aguardientes.azarcafetero.game.infrastructure.websocket.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.UUID;
+
 public class JoinTableDTO {
     @JsonProperty("playerId")
     private String playerId;
@@ -14,6 +16,9 @@ public class JoinTableDTO {
 
     @JsonProperty("balance")
     private Double balance;
+
+    @JsonProperty("floorId")
+    private UUID floorId;
 
     public JoinTableDTO() {
     }
@@ -61,6 +66,14 @@ public class JoinTableDTO {
         this.balance = balance;
     }
 
+    public UUID getFloorId() {
+        return floorId;
+    }
+
+    public void setFloorId(UUID floorId) {
+        this.floorId = floorId;
+    }
+
     @Override
     public String toString() {
         return "JoinTableDTO{" +
@@ -68,6 +81,7 @@ public class JoinTableDTO {
                 ", playerName='" + playerName + '\'' +
                 ", tableId='" + tableId + '\'' +
                 ", balance=" + balance +
+                ", floorId=" + floorId +
                 '}';
     }
 }

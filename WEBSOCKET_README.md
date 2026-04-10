@@ -130,9 +130,12 @@ SUBSCRIBE /topic/table/{tableId}
 {
   "playerId": "player-1",
   "playerName": "Alice",
-  "tableId": "table-1"
+  "tableId": "table-1",
+  "floorId": "550e8400-e29b-41d4-a716-446655440000"
 }
 ```
+
+`floorId` is optional but recommended so floor-level real-time occupancy events are published to the correct floor topic.
 
 ### Table Message
 ```json

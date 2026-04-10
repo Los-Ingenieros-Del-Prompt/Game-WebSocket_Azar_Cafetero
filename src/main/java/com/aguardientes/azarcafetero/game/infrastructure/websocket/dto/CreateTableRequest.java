@@ -2,6 +2,8 @@ package com.aguardientes.azarcafetero.game.infrastructure.websocket.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.UUID;
+
 public class CreateTableRequest {
     @JsonProperty("tableName")
     private String tableName;
@@ -11,6 +13,9 @@ public class CreateTableRequest {
 
     @JsonProperty("maxPlayers")
     private Integer maxPlayers;
+
+    @JsonProperty("floorId")
+    private UUID floorId;
 
     public CreateTableRequest() {
     }
@@ -49,12 +54,21 @@ public class CreateTableRequest {
         this.maxPlayers = maxPlayers;
     }
 
+    public UUID getFloorId() {
+        return floorId;
+    }
+
+    public void setFloorId(UUID floorId) {
+        this.floorId = floorId;
+    }
+
     @Override
     public String toString() {
         return "CreateTableRequest{" +
                 "tableName='" + tableName + '\'' +
                 ", requiredBet=" + requiredBet +
                 ", maxPlayers=" + maxPlayers +
+                ", floorId=" + floorId +
                 '}';
     }
 }

@@ -10,9 +10,12 @@ import com.aguardientes.azarcafetero.game.application.port.in.NotifyTableClosedU
 import com.aguardientes.azarcafetero.game.application.port.in.SubscribeToFloorUseCase;
 import com.aguardientes.azarcafetero.game.application.port.in.UnsubscribeFromFloorUseCase;
 import com.aguardientes.azarcafetero.game.application.port.out.LobbyPlayerClient;
+import com.aguardientes.azarcafetero.game.application.port.out.TableSessionRepository;
 import com.aguardientes.azarcafetero.game.domain.Player;
+import com.aguardientes.azarcafetero.game.domain.TableSession;
 import com.aguardientes.azarcafetero.game.domain.TableMessage;
 import com.aguardientes.azarcafetero.game.infrastructure.client.dto.LobbyPlayerDTO;
+import com.aguardientes.azarcafetero.game.infrastructure.floor.InMemoryTableFloorRegistry;
 import com.aguardientes.azarcafetero.game.infrastructure.websocket.dto.JoinTableDTO;
 import com.aguardientes.azarcafetero.game.infrastructure.websocket.dto.TableMessageDTO;
 import com.aguardientes.azarcafetero.game.infrastructure.websocket.dto.SubscribeToFloorDTO;
@@ -22,10 +25,12 @@ import com.aguardientes.azarcafetero.game.infrastructure.websocket.dto.TableClos
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 import java.time.Instant;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Controller
@@ -40,6 +45,9 @@ public class TableWebSocketController {
     private final SubscribeToFloorUseCase subscribeToFloorUseCase;
     private final UnsubscribeFromFloorUseCase unsubscribeFromFloorUseCase;
     private final LobbyPlayerClient lobbyPlayerClient;
+    private final TableSessionRepository tableSessionRepository;
+    private final InMemoryTableFloorRegistry tableFloorRegistry;
+    private final UUID defaultBriscaFloorId;
 
     public TableWebSocketController(
             JoinTableUseCase joinTableUseCase,
@@ -51,7 +59,10 @@ public class TableWebSocketController {
             NotifyTableClosedUseCase notifyTableClosedUseCase,
             SubscribeToFloorUseCase subscribeToFloorUseCase,
             UnsubscribeFromFloorUseCase unsubscribeFromFloorUseCase,
-            LobbyPlayerClient lobbyPlayerClient) {
+            LobbyPlayerClient lobbyPlayerClient,
+            TableSessionRepository tableSessionRepository,
+            InMemoryTableFloorRegistry tableFloorRegistry,
+            @Value("${game.floor.brisca-id:}") String defaultBriscaFloorId) {
         this.joinTableUseCase = Objects.requireNonNull(joinTableUseCase, "JoinTableUseCase cannot be null");
         this.leaveTableUseCase = Objects.requireNonNull(leaveTableUseCase, "LeaveTableUseCase cannot be null");
         this.sendMessageUseCase = Objects.requireNonNull(sendMessageUseCase, "SendMessageUseCase cannot be null");
@@ -62,6 +73,9 @@ public class TableWebSocketController {
         this.subscribeToFloorUseCase = Objects.requireNonNull(subscribeToFloorUseCase, "SubscribeToFloorUseCase cannot be null");
         this.unsubscribeFromFloorUseCase = Objects.requireNonNull(unsubscribeFromFloorUseCase, "UnsubscribeFromFloorUseCase cannot be null");
         this.lobbyPlayerClient = Objects.requireNonNull(lobbyPlayerClient, "LobbyPlayerClient cannot be null");
+        this.tableSessionRepository = Objects.requireNonNull(tableSessionRepository, "TableSessionRepository cannot be null");
+        this.tableFloorRegistry = Objects.requireNonNull(tableFloorRegistry, "TableFloorRegistry cannot be null");
+        this.defaultBriscaFloorId = parseOptionalFloorId(defaultBriscaFloorId);
     }
 
     @MessageMapping("/table/{tableId}/join")
@@ -80,6 +94,20 @@ public class TableWebSocketController {
         );
         
         joinTableUseCase.joinTable(tableId, player);
+
+        TableSession session = tableSessionRepository.findById(tableId)
+                .orElseThrow(() -> new IllegalStateException("Table session not found after join: " + tableId));
+
+        UUID floorId = resolveFloorId(tableId, joinRequest.getFloorId());
+        if (floorId != null) {
+            notifyPlayerJoinedUseCase.notifyPlayerJoined(
+                    floorId,
+                    tableId,
+                    lobbyPlayer.getDisplayName(),
+                    session.getPlayerCount(),
+                    session.getAvailableSeats()
+            );
+        }
         
         return new TableMessageDTO(
                 "SYSTEM",
@@ -102,6 +130,12 @@ public class TableWebSocketController {
         );
         
         leaveTableUseCase.leaveTable(tableId, player);
+
+        UUID floorId = resolveFloorId(tableId, leaveRequest.getFloorId());
+        if (floorId != null && !tableSessionRepository.existsById(tableId)) {
+            notifyTableClosedUseCase.notifyTableClosed(floorId, tableId);
+            tableFloorRegistry.remove(tableId);
+        }
         
         return new TableMessageDTO(
                 "SYSTEM",
@@ -169,5 +203,30 @@ public class TableWebSocketController {
             @DestinationVariable UUID floorId) {
         
         notifyTableClosedUseCase.notifyTableClosed(floorId, request.getTableId());
+    }
+
+    private UUID resolveFloorId(String tableId, UUID floorIdFromRequest) {
+        if (floorIdFromRequest != null) {
+            tableFloorRegistry.register(tableId, floorIdFromRequest);
+            return floorIdFromRequest;
+        }
+
+        Optional<UUID> floorIdFromRegistry = tableFloorRegistry.findFloorId(tableId);
+        if (floorIdFromRegistry.isPresent()) {
+            return floorIdFromRegistry.get();
+        }
+
+        return defaultBriscaFloorId;
+    }
+
+    private UUID parseOptionalFloorId(String floorId) {
+        if (floorId == null || floorId.isBlank()) {
+            return null;
+        }
+        try {
+            return UUID.fromString(floorId.trim());
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException("Invalid UUID in game.floor.brisca-id");
+        }
     }
 }

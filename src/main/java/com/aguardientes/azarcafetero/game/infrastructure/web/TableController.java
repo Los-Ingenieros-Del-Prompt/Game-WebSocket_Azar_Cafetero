@@ -1,29 +1,45 @@
 package com.aguardientes.azarcafetero.game.infrastructure.web;
 
 import com.aguardientes.azarcafetero.game.application.port.in.CreateTableUseCase;
+import com.aguardientes.azarcafetero.game.application.port.in.NotifyTableCreatedUseCase;
 import com.aguardientes.azarcafetero.game.domain.Table;
 import com.aguardientes.azarcafetero.game.domain.TableSession;
+import com.aguardientes.azarcafetero.game.infrastructure.floor.InMemoryTableFloorRegistry;
 import com.aguardientes.azarcafetero.game.infrastructure.messaging.TableSessionManager;
 import com.aguardientes.azarcafetero.game.infrastructure.websocket.dto.CreateTableRequest;
 import com.aguardientes.azarcafetero.game.infrastructure.websocket.dto.TableDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/tables")
 public class TableController {
+    private final TableSessionManager sessionManager;
+    private final CreateTableUseCase createTableUseCase;
+    private final NotifyTableCreatedUseCase notifyTableCreatedUseCase;
+    private final InMemoryTableFloorRegistry tableFloorRegistry;
+    private final UUID defaultBriscaFloorId;
 
-    @Autowired
-    private TableSessionManager sessionManager;
-
-    @Autowired
-    private CreateTableUseCase createTableUseCase;
+    public TableController(
+            TableSessionManager sessionManager,
+            CreateTableUseCase createTableUseCase,
+            NotifyTableCreatedUseCase notifyTableCreatedUseCase,
+            InMemoryTableFloorRegistry tableFloorRegistry,
+            @Value("${game.floor.brisca-id:}") String defaultBriscaFloorId) {
+        this.sessionManager = Objects.requireNonNull(sessionManager, "SessionManager cannot be null");
+        this.createTableUseCase = Objects.requireNonNull(createTableUseCase, "CreateTableUseCase cannot be null");
+        this.notifyTableCreatedUseCase = Objects.requireNonNull(notifyTableCreatedUseCase, "NotifyTableCreatedUseCase cannot be null");
+        this.tableFloorRegistry = Objects.requireNonNull(tableFloorRegistry, "TableFloorRegistry cannot be null");
+        this.defaultBriscaFloorId = parseOptionalFloorId(defaultBriscaFloorId);
+    }
 
     @PostMapping
     public ResponseEntity<TableDTO> createTable(@RequestBody CreateTableRequest request) {
@@ -40,6 +56,11 @@ public class TableController {
         }
 
         Table table = createTableUseCase.createTable(request.getTableName(), request.getRequiredBet(), maxPlayers);
+        UUID floorId = request.getFloorId() != null ? request.getFloorId() : defaultBriscaFloorId;
+        if (floorId != null) {
+            tableFloorRegistry.register(table.getId(), floorId);
+            notifyTableCreatedUseCase.notifyTableCreated(floorId, table.getId(), table.getName(), maxPlayers);
+        }
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new TableDTO(table.getId(), table.getName(), 0, System.currentTimeMillis(), table.getRequiredBet()));
@@ -69,5 +90,16 @@ public class TableController {
                 table.getCreatedAt(),
                 table.getTable().getRequiredBet()
         );
+    }
+
+    private UUID parseOptionalFloorId(String floorId) {
+        if (floorId == null || floorId.isBlank()) {
+            return null;
+        }
+        try {
+            return UUID.fromString(floorId.trim());
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException("Invalid UUID in game.floor.brisca-id");
+        }
     }
 }
