@@ -33,23 +33,27 @@ public class TableController {
         if (request.getRequiredBet() == null || request.getRequiredBet() <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Required bet must be positive");
         }
+        if (request.getFloorId() == null || request.getFloorId().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Floor ID cannot be blank");
+        }
         
         int maxPlayers = request.getMaxPlayers() != null ? request.getMaxPlayers() : 6;
         if (maxPlayers <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Max players must be positive");
         }
 
-        Table table = createTableUseCase.createTable(request.getTableName(), request.getRequiredBet(), maxPlayers);
+        Table table = createTableUseCase.createTable(request.getTableName(), request.getRequiredBet(), maxPlayers, request.getFloorId());
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new TableDTO(table.getId(), table.getName(), 0, System.currentTimeMillis(), table.getRequiredBet()));
+                .body(new TableDTO(table.getId(), table.getName(), 0, System.currentTimeMillis(), table.getRequiredBet(), table.getFloorId()));
     }
 
     @GetMapping
-    public List<TableDTO> getAllTables() {
+    public List<TableDTO> getAllTables(@RequestParam(required = false) String floorId) {
         return sessionManager.getAllSessions()
                 .values()
                 .stream()
+                .filter(session -> floorId == null || session.getTable().getFloorId().equals(floorId))
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
@@ -67,7 +71,8 @@ public class TableController {
                 table.getTable().getName(),
                 table.getPlayerCount(),
                 table.getCreatedAt(),
-                table.getTable().getRequiredBet()
+                table.getTable().getRequiredBet(),
+                table.getTable().getFloorId()
         );
     }
 }

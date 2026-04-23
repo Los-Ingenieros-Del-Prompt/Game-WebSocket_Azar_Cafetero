@@ -12,17 +12,21 @@ public class CreateTableRequest {
     @JsonProperty("maxPlayers")
     private Integer maxPlayers;
 
+    @JsonProperty("floorId")
+    private String floorId;
+
     public CreateTableRequest() {
     }
 
-    public CreateTableRequest(String tableName, Double requiredBet) {
-        this(tableName, requiredBet, 6);
+    public CreateTableRequest(String tableName, Double requiredBet, String floorId) {
+        this(tableName, requiredBet, 6, floorId);
     }
 
-    public CreateTableRequest(String tableName, Double requiredBet, Integer maxPlayers) {
+    public CreateTableRequest(String tableName, Double requiredBet, Integer maxPlayers, String floorId) {
         this.tableName = tableName;
         this.requiredBet = requiredBet;
         this.maxPlayers = maxPlayers;
+        this.floorId = floorId;
     }
 
     public String getTableName() {
@@ -49,12 +53,21 @@ public class CreateTableRequest {
         this.maxPlayers = maxPlayers;
     }
 
+    public String getFloorId() {
+        return floorId;
+    }
+
+    public void setFloorId(String floorId) {
+        this.floorId = floorId;
+    }
+
     @Override
     public String toString() {
         return "CreateTableRequest{" +
                 "tableName='" + tableName + '\'' +
                 ", requiredBet=" + requiredBet +
                 ", maxPlayers=" + maxPlayers +
+                ", floorId='" + floorId + '\'' +
                 '}';
     }
 }
