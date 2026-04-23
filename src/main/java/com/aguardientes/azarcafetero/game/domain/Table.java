@@ -7,18 +7,20 @@ public class Table {
     private final String name;
     private final double requiredBet;
     private final int maxPlayers;
+    private final String floorId;
 
-    public Table(String id, String name) {
-        this(id, name, 0, 6);
+    public Table(String id, String name, String floorId) {
+        this(id, name, 0, 6, floorId);
     }
 
-    public Table(String id, String name, double requiredBet) {
-        this(id, name, requiredBet, 6);
+    public Table(String id, String name, double requiredBet, String floorId) {
+        this(id, name, requiredBet, 6, floorId);
     }
 
-    public Table(String id, String name, double requiredBet, int maxPlayers) {
+    public Table(String id, String name, double requiredBet, int maxPlayers, String floorId) {
         this.id = Objects.requireNonNull(id, "Table id cannot be null");
         this.name = Objects.requireNonNull(name, "Table name cannot be null");
+        this.floorId = Objects.requireNonNull(floorId, "Floor id cannot be null");
         if (requiredBet < 0) throw new IllegalArgumentException("Required bet must be positive");
         if (maxPlayers <= 0) throw new IllegalArgumentException("Max players must be positive");
         this.requiredBet = requiredBet;
@@ -39,6 +41,10 @@ public class Table {
 
     public int getMaxPlayers() {
         return maxPlayers;
+    }
+    
+    public String getFloorId() {
+        return floorId;
     }
 
     @Override
@@ -61,6 +67,7 @@ public class Table {
                 ", name='" + name + '\'' +
                 ", requiredBet=" + requiredBet +
                 ", maxPlayers=" + maxPlayers +
+                ", floorId='" + floorId + '\'' +
                 '}';
     }
 

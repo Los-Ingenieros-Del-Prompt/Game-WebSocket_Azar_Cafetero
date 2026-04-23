@@ -1,0 +1,51 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------< com.aguardientes.azarcafetero:game >-----------------
+[INFO] Building game 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ game ---
+[INFO] Deleting /home/minin/storage/Uni/ARSW/AzarCafetero/Microservicios/Game-WebSocket_Azar_Cafetero/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ game ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ game ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 54 source files with javac [debug parameters release 21] to target/classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/minin/storage/Uni/ARSW/AzarCafetero/Microservicios/Game-WebSocket_Azar_Cafetero/src/main/java/com/aguardientes/azarcafetero/game/application/port/service/JoinTableService.java:[26,23] no suitable constructor found for Table(java.lang.String,java.lang.String)
+    constructor com.aguardientes.azarcafetero.game.domain.Table.Table(java.lang.String,java.lang.String,java.lang.String) is not applicable
+      (actual and formal argument lists differ in length)
+    constructor com.aguardientes.azarcafetero.game.domain.Table.Table(java.lang.String,java.lang.String,double,java.lang.String) is not applicable
+      (actual and formal argument lists differ in length)
+    constructor com.aguardientes.azarcafetero.game.domain.Table.Table(java.lang.String,java.lang.String,double,int,java.lang.String) is not applicable
+      (actual and formal argument lists differ in length)
+[INFO] 1 error
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.150 s
+[INFO] Finished at: 2026-04-22T19:05:08-05:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.14.1:compile (default-compile) on project game: Compilation failure
+[ERROR] /home/minin/storage/Uni/ARSW/AzarCafetero/Microservicios/Game-WebSocket_Azar_Cafetero/src/main/java/com/aguardientes/azarcafetero/game/application/port/service/JoinTableService.java:[26,23] no suitable constructor found for Table(java.lang.String,java.lang.String)
+[ERROR]     constructor com.aguardientes.azarcafetero.game.domain.Table.Table(java.lang.String,java.lang.String,java.lang.String) is not applicable
+[ERROR]       (actual and formal argument lists differ in length)
+[ERROR]     constructor com.aguardientes.azarcafetero.game.domain.Table.Table(java.lang.String,java.lang.String,double,java.lang.String) is not applicable
+[ERROR]       (actual and formal argument lists differ in length)
+[ERROR]     constructor com.aguardientes.azarcafetero.game.domain.Table.Table(java.lang.String,java.lang.String,double,int,java.lang.String) is not applicable
+[ERROR]       (actual and formal argument lists differ in length)
+[ERROR] 
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

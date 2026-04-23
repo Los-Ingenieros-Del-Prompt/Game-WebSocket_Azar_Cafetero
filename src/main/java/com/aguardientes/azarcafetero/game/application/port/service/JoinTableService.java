@@ -23,7 +23,7 @@ public class JoinTableService implements JoinTableUseCase {
         Objects.requireNonNull(player, "Player cannot be null");
 
         // Atomically get or create the session to prevent race conditions
-        Table table = new Table(tableId, "Table-" + tableId);
+        Table table = new Table(tableId, "Table-" + tableId, "unknown");
         TableSession session = sessionRepository.getOrCreate(tableId, table);
 
         // Synchronize on the session to prevent concurrent modifications

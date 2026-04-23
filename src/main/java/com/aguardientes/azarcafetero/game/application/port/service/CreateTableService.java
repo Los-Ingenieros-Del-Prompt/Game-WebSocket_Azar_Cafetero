@@ -18,11 +18,15 @@ public class CreateTableService implements CreateTableUseCase {
     }
 
     @Override
-    public Table createTable(String tableName, double requiredBet, int maxPlayers) {
+    public Table createTable(String tableName, double requiredBet, int maxPlayers, String floorId) {
         Objects.requireNonNull(tableName, "Table name cannot be null");
+        Objects.requireNonNull(floorId, "Floor ID cannot be null");
         
         if (tableName.isBlank()) {
             throw new IllegalArgumentException("Table name cannot be blank");
+        }
+        if (floorId.isBlank()) {
+            throw new IllegalArgumentException("Floor ID cannot be blank");
         }
         
         if (requiredBet <= 0) {
@@ -34,7 +38,7 @@ public class CreateTableService implements CreateTableUseCase {
         }
 
         String tableId = UUID.randomUUID().toString();
-        Table table = new Table(tableId, tableName, requiredBet, maxPlayers);
+        Table table = new Table(tableId, tableName, requiredBet, maxPlayers, floorId);
         TableSession session = new TableSession(table);
         sessionRepository.save(session);
 

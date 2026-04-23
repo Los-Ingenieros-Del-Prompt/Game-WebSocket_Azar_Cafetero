@@ -219,11 +219,13 @@ public class TableWebSocketIntegrationTest {
     public void testTableProperties() {
         String tableId = "table-test";
         String tableName = "Test Table";
+        String floorId = "floor-test";
 
-        Table table = new Table(tableId, tableName);
+        Table table = new Table(tableId, tableName, floorId);
 
         assertEquals(tableId, table.getId());
         assertEquals(tableName, table.getName());
+        assertEquals(floorId, table.getFloorId());
     }
 
     @Test
@@ -235,8 +237,9 @@ public class TableWebSocketIntegrationTest {
 
     @Test
     public void testNullValidationInTable() {
-        assertThrows(NullPointerException.class, () -> new Table(null, "Table"));
-        assertThrows(NullPointerException.class, () -> new Table("table-1", null));
+        assertThrows(NullPointerException.class, () -> new Table(null, "Table", "floor-1"));
+        assertThrows(NullPointerException.class, () -> new Table("table-1", null, "floor-1"));
+        assertThrows(NullPointerException.class, () -> new Table("table-1", "Table", null));
     }
 
     @Test
@@ -250,7 +253,7 @@ public class TableWebSocketIntegrationTest {
 
     @Test
     public void testTableSessionInitialization() {
-        Table table = new Table("table-1", "Test Table");
+        Table table = new Table("table-1", "Test Table", "floor-1");
         TableSession session = new TableSession(table);
 
         assertNotNull(session.getTable());
@@ -270,8 +273,8 @@ public class TableWebSocketIntegrationTest {
 
     @Test
     public void testTableEquality() {
-        Table table1 = new Table("table-1", "Table A");
-        Table table2 = new Table("table-1", "Table B");
+        Table table1 = new Table("table-1", "Table A", "floor-1");
+        Table table2 = new Table("table-1", "Table B", "floor-2");
 
         assertEquals(table1, table2);
     }

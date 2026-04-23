@@ -18,22 +18,27 @@ public class TableDTO {
     @JsonProperty("requiredBet")
     private Double requiredBet;
 
+    @JsonProperty("floorId")
+    private String floorId;
+
     public TableDTO() {
     }
 
-    public TableDTO(String tableId, String tableName, Integer playerCount, Long createdAt) {
+    public TableDTO(String tableId, String tableName, Integer playerCount, Long createdAt, String floorId) {
         this.tableId = tableId;
         this.tableName = tableName;
         this.playerCount = playerCount;
         this.createdAt = createdAt;
+        this.floorId = floorId;
     }
 
-    public TableDTO(String tableId, String tableName, Integer playerCount, Long createdAt, Double requiredBet) {
+    public TableDTO(String tableId, String tableName, Integer playerCount, Long createdAt, Double requiredBet, String floorId) {
         this.tableId = tableId;
         this.tableName = tableName;
         this.playerCount = playerCount;
         this.createdAt = createdAt;
         this.requiredBet = requiredBet;
+        this.floorId = floorId;
     }
 
     public String getTableId() {
@@ -76,6 +81,14 @@ public class TableDTO {
         this.requiredBet = requiredBet;
     }
 
+    public String getFloorId() {
+        return floorId;
+    }
+
+    public void setFloorId(String floorId) {
+        this.floorId = floorId;
+    }
+
     @Override
     public String toString() {
         return "TableDTO{" +
@@ -84,6 +97,7 @@ public class TableDTO {
                 ", playerCount=" + playerCount +
                 ", createdAt=" + createdAt +
                 ", requiredBet=" + requiredBet +
+                ", floorId='" + floorId + '\'' +
                 '}';
     }
 }
