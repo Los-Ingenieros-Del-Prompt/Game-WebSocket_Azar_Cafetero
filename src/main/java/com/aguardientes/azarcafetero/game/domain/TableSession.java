@@ -34,6 +34,11 @@ public class TableSession {
         players.remove(player);
     }
 
+    public void removePlayerById(String playerId) {
+        Objects.requireNonNull(playerId, "Player id cannot be null");
+        players.removeIf(p -> p.getId().equals(playerId));
+    }
+
     public Set<Player> getPlayers() {
         return Collections.unmodifiableSet(new HashSet<>(players));
     }

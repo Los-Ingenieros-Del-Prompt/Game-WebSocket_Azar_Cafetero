@@ -28,11 +28,15 @@ public class LeaveTableService implements LeaveTableUseCase {
 
         TableSession session = sessionRepository.findById(tableId).orElse(null);
         if (session != null) {
-            session.removePlayer(player);
+            System.out.println("[Lobby] Player " + player.getId() + " leaving table " + tableId);
+            session.removePlayerById(player.getId());
             if (session.isEmpty()) {
+                System.out.println("[Lobby] Table " + tableId + " is now empty. Closing.");
                 String floorId = session.getTable().getFloorId();
                 sessionRepository.deleteById(tableId);
                 notifyTableClosedUseCase.notifyTableClosed(java.util.UUID.fromString(floorId), tableId);
+            } else {
+                System.out.println("[Lobby] Table " + tableId + " still has " + session.getPlayerCount() + " players.");
             }
         }
     }
