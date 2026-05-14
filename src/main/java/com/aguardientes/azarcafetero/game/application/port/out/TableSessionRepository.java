@@ -11,4 +11,5 @@ public interface TableSessionRepository {
     void deleteById(String tableId);
     boolean existsById(String tableId);
     TableSession getOrCreate(String tableId, Table table);
+    java.util.List<TableSession> findAll();
 }

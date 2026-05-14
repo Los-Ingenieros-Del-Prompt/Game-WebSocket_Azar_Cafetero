@@ -71,4 +71,9 @@ public class TableSessionManager implements TableSessionRepository {
     public void clearAllSessions() {
         sessions.clear();
     }
+
+    @Override
+    public java.util.List<TableSession> findAll() {
+        return new java.util.ArrayList<>(sessions.values());
+    }
 }
