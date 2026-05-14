@@ -68,7 +68,8 @@ public class TableWebSocketController {
     @SendTo("/topic/table/{tableId}")
     public TableMessageDTO handleJoinTable(
             JoinTableDTO joinRequest,
-            @DestinationVariable String tableId) {
+            @DestinationVariable String tableId,
+            org.springframework.messaging.simp.SimpMessageHeaderAccessor headerAccessor) {
         
         LobbyPlayerDTO lobbyPlayer = lobbyPlayerClient.getPlayerById(joinRequest.getPlayerId());
         
@@ -80,6 +81,11 @@ public class TableWebSocketController {
         );
         
         joinTableUseCase.joinTable(tableId, player);
+        
+        // Store session attributes for disconnect handling
+        headerAccessor.getSessionAttributes().put("playerId", joinRequest.getPlayerId());
+        headerAccessor.getSessionAttributes().put("playerName", lobbyPlayer.getDisplayName());
+        headerAccessor.getSessionAttributes().put("tableId", tableId);
         
         return new TableMessageDTO(
                 "SYSTEM",
