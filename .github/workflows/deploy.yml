@@ -5,7 +5,18 @@ on:
     branches: [main]
 
 jobs:
+  code-quality:
+    uses: ./.github/workflows/code-quality.yml
+    with:
+      java-version: '21'
+      sonar-project-key: 'Los-Ingenieros-Del-Prompt_Game-WebSocket_Azar_Cafetero'
+      sonar-organization: 'los-ingenieros-del-prompt'
+      coverage-threshold: 80
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   build-and-deploy:
+    needs: code-quality   # <-- bloquea el deploy si calidad falla
     runs-on: ubuntu-latest
 
     steps:
