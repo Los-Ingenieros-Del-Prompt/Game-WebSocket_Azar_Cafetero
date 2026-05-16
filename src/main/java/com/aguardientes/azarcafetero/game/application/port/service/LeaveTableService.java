@@ -34,7 +34,11 @@ public class LeaveTableService implements LeaveTableUseCase {
                 System.out.println("[Lobby] Table " + tableId + " is now empty. Closing.");
                 String floorId = session.getTable().getFloorId();
                 sessionRepository.deleteById(tableId);
-                notifyTableClosedUseCase.notifyTableClosed(java.util.UUID.fromString(floorId), tableId);
+                try {
+                    notifyTableClosedUseCase.notifyTableClosed(java.util.UUID.fromString(floorId), tableId);
+                } catch (IllegalArgumentException ignored) {
+                    // floorId is not a valid UUID (e.g. placeholder "unknown") — skip floor notification
+                }
             } else {
                 System.out.println("[Lobby] Table " + tableId + " still has " + session.getPlayerCount() + " players.");
             }
