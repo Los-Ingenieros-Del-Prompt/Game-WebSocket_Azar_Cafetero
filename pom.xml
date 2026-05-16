@@ -28,6 +28,12 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<!-- Sonar -->
+		<sonar.organization>los-ingenieros-del-prompt</sonar.organization>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<sonar.coverage.jacoco.xmlReportPaths>
+			${project.build.directory}/site/jacoco/jacoco.xml
+		</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -74,6 +80,86 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.11</version>
+
+				<configuration>
+					<excludes>
+						<!-- Clase main -->
+						<exclude>**/GameApplication.class</exclude>
+						<!-- DTOs de WebSocket (sin lógica) -->
+						<exclude>**/infrastructure/websocket/dto/**</exclude>
+						<!-- DTOs de clientes externos -->
+						<exclude>**/infrastructure/client/dto/**</exclude>
+						<!-- Configuración de infraestructura -->
+						<exclude>**/infrastructure/config/**</exclude>
+						<!-- Configuración de WebSocket -->
+						<exclude>**/infrastructure/websocket/WebSocketConfig.class</exclude>
+						<!-- Tarea de limpieza programada -->
+						<exclude>**/infrastructure/tasks/TableCleanupTask.class</exclude>
+						<!-- Controladores WebSocket y REST (integración, no unitarios) -->
+						<exclude>**/infrastructure/websocket/TableWebSocketController.class</exclude>
+						<exclude>**/infrastructure/websocket/WebSocketEventListener.class</exclude>
+						<exclude>**/infrastructure/web/TableController.class</exclude>
+						<!-- Cliente REST externo -->
+						<exclude>**/infrastructure/client/RestLobbyPlayerClient.class</exclude>
+					</excludes>
+				</configuration>
+
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+
+					<execution>
+						<id>check-coverage</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<excludes>
+								<exclude>**/GameApplication.class</exclude>
+								<exclude>**/infrastructure/websocket/dto/**</exclude>
+								<exclude>**/infrastructure/client/dto/**</exclude>
+								<exclude>**/infrastructure/config/**</exclude>
+								<exclude>**/infrastructure/websocket/WebSocketConfig.class</exclude>
+								<exclude>**/infrastructure/tasks/TableCleanupTask.class</exclude>
+								<exclude>**/infrastructure/websocket/TableWebSocketController.class</exclude>
+								<exclude>**/infrastructure/websocket/WebSocketEventListener.class</exclude>
+								<exclude>**/infrastructure/web/TableController.class</exclude>
+								<exclude>**/infrastructure/client/RestLobbyPlayerClient.class</exclude>
+							</excludes>
+							<rules>
+								<rule>
+									<element>BUNDLE</element>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.80</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
