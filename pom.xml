@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>4.0.3</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
 	</parent>
 	<groupId>com.aguardientes.azarcafetero</groupId>
 	<artifactId>game</artifactId>
@@ -14,60 +14,68 @@
 	<name>game</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
+	<licenses><license/></licenses>
+	<developers><developer/></developers>
+	<scm><connection/><developerConnection/><tag/><url/></scm>
+
 	<properties>
 		<java.version>21</java.version>
+
 		<!-- Sonar -->
 		<sonar.organization>los-ingenieros-del-prompt</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.coverage.jacoco.xmlReportPaths>
 			${project.build.directory}/site/jacoco/jacoco.xml
 		</sonar.coverage.jacoco.xmlReportPaths>
+
+		<!-- ✅ Exclusiones de cobertura (mvn sonar:sonar las lee desde aquí) -->
+		<sonar.coverage.exclusions>
+			**/GameApplication.java,
+			**/infrastructure/websocket/dto/**,
+			**/infrastructure/client/dto/**,
+			**/infrastructure/config/**,
+			**/infrastructure/websocket/WebSocketConfig.java,
+			**/infrastructure/tasks/TableCleanupTask.java,
+			**/infrastructure/websocket/TableWebSocketController.java,
+			**/infrastructure/websocket/WebSocketEventListener.java,
+			**/infrastructure/web/TableController.java,
+			**/infrastructure/client/RestLobbyPlayerClient.java
+		</sonar.coverage.exclusions>
+
+		<!-- ✅ Exclusiones de análisis (DTOs/configs no aportan a Quality Gate) -->
+		<sonar.exclusions>
+			**/infrastructure/websocket/dto/**,
+			**/infrastructure/client/dto/**,
+			**/infrastructure/config/**
+		</sonar.exclusions>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-websocket</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
-
-		<!-- Apache HttpClient for connection pooling -->
 		<dependency>
 			<groupId>org.apache.httpcomponents.client5</groupId>
 			<artifactId>httpclient5</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
@@ -89,23 +97,15 @@
 
 				<configuration>
 					<excludes>
-						<!-- Clase main -->
 						<exclude>**/GameApplication.class</exclude>
-						<!-- DTOs de WebSocket (sin lógica) -->
 						<exclude>**/infrastructure/websocket/dto/**</exclude>
-						<!-- DTOs de clientes externos -->
 						<exclude>**/infrastructure/client/dto/**</exclude>
-						<!-- Configuración de infraestructura -->
 						<exclude>**/infrastructure/config/**</exclude>
-						<!-- Configuración de WebSocket -->
 						<exclude>**/infrastructure/websocket/WebSocketConfig.class</exclude>
-						<!-- Tarea de limpieza programada -->
 						<exclude>**/infrastructure/tasks/TableCleanupTask.class</exclude>
-						<!-- Controladores WebSocket y REST (integración, no unitarios) -->
 						<exclude>**/infrastructure/websocket/TableWebSocketController.class</exclude>
 						<exclude>**/infrastructure/websocket/WebSocketEventListener.class</exclude>
 						<exclude>**/infrastructure/web/TableController.class</exclude>
-						<!-- Cliente REST externo -->
 						<exclude>**/infrastructure/client/RestLobbyPlayerClient.class</exclude>
 					</excludes>
 				</configuration>
